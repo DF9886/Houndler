@@ -6,17 +6,131 @@
   <title>Houndler AI</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { margin: 0; font-family: -apple-system, sans-serif; background: #0e1621; color: #fff; display: flex; height: 100vh; overflow: hidden; }
-    .sidebar { width: 130px; background: #17212b; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; }
-    .sidebar button { width: 100%; background: #2b5278; color: #fff; border: none; padding: 10px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 13px; }
-    .chat { flex: 1; display: flex; flex-direction: column; }
-    .messages { flex: 1; overflow-y: auto; padding: 15px; }
-    .msg { margin-bottom: 10px; padding: 10px; border-radius: 10px; max-width: 85%; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-    .user { background: #2b5278; margin-left: auto; }
-    .bot { background: #182533; white-space: pre-wrap; }
-    .input-area { display: flex; padding: 10px; background: #17212b; }
-    .input-area input { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #0e1621; color: #fff; outline: none; font-size: 14px; }
-    .input-area button { margin-left: 8px; background: #2b5278; color: #fff; border: none; padding: 0 16px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+    :root {
+      --bg: var(--tg-theme-bg-color, #0e1621);
+      --secondary-bg: var(--tg-theme-secondary-bg-color, #17212b);
+      --text: var(--tg-theme-text-color, #ffffff);
+      --hint: var(--tg-theme-hint-color, #708499);
+      --button: var(--tg-theme-button-color, #2b5278);
+      --button-text: var(--tg-theme-button-text-color, #ffffff);
+      --user-bubble: var(--tg-theme-button-color, #2b5278);
+      --bot-bubble: var(--tg-theme-secondary-bg-color, #182533);
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 130px;
+      background: var(--secondary-bg);
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(128,128,128,0.15);
+    }
+
+    .sidebar button {
+      width: 100%;
+      background: var(--button);
+      color: var(--button-text);
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .chat-item {
+      padding: 8px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text);
+      opacity: 0.8;
+    }
+
+    .chat-item.active {
+      background: var(--button);
+      color: var(--button-text);
+      opacity: 1;
+    }
+
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .msg {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 85%;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      background: var(--user-bubble);
+      color: var(--button-text);
+      margin-left: auto;
+    }
+
+    .bot {
+      background: var(--bot-bubble);
+      color: var(--text);
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background: var(--secondary-bg);
+      border-top: 1px solid rgba(128,128,128,0.15);
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+
+    .input-area input::placeholder {
+      color: var(--hint);
+    }
+
+    .input-area button {
+      margin-left: 8px;
+      background: var(--button);
+      color: var(--button-text);
+      border: none;
+      padding: 0 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -37,7 +151,7 @@
     tg.ready();
     tg.expand();
 
-    const WEBHOOK_URL = "https://api.telebotcreator.com/new-webhook?data=gAAAAABqulTuEfTdYqXeTzFLnfZT8tsiW-o644_nevoSVuiXGyx8deT8-hFvud1hhQn6y-RQF9d-UMgRxSOS2xYcDGZoflAvdoIGLvGbAfb7ZHR9EtOwmAsFze0BlirVWNe-H65NvtaI2GRoD2TAufWqOW5HHse13_S7lPz9XIa-AHElKYykl-2xh8J9VhA4tiAVTweSNHzL";
+    const WEBHOOK_URL = "https://api.telebotcreator.com/new-webhook?data=ТВОЙ_DATA";
 
     let currentChat = 1;
     let chats = [1];
@@ -72,7 +186,7 @@
         const messages = document.getElementById('messages');
         messages.removeChild(messages.lastChild);
 
-        if (data.ok && data.result && data.result.answer) {
+        if (data.result && data.result.answer) {
           addMessage(data.result.answer, 'bot');
         } else {
           addMessage("⚠️ Ошибка: " + JSON.stringify(data), 'bot');
@@ -95,7 +209,8 @@
       const list = document.getElementById('chat-list');
       list.innerHTML = '';
       chats.forEach((id) => {
-        list.innerHTML += `<div class="chat-item" onclick="switchChat(${id})">💬 Чат ${id}</div>`;
+        const active = id === currentChat ? 'active' : '';
+        list.innerHTML += `<div class="chat-item ${active}" onclick="switchChat(${id})">💬 Чат ${id}</div>`;
       });
     }
 
@@ -103,6 +218,7 @@
       currentChat = id;
       document.getElementById('messages').innerHTML = '';
       addMessage('Ты в чате ' + id, 'bot');
+      renderChatList();
     }
 
     renderChatList();
