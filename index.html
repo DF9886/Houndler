@@ -6,96 +6,17 @@
   <title>Houndler AI</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, sans-serif;
-      background: #0e1621;
-      color: #fff;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .sidebar {
-      width: 130px;
-      background: #17212b;
-      padding: 10px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar button {
-      width: 100%;
-      background: #2b5278;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .chat-item {
-      padding: 8px;
-      margin-bottom: 4px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      background: #1e2c3a;
-    }
-    .chat-item.active {
-      background: #2b5278;
-    }
-    .chat {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-    }
-    .msg {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 85%;
-      font-size: 14px;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
-    .user {
-      background: #2b5278;
-      margin-left: auto;
-    }
-    .bot {
-      background: #182533;
-    }
-    .input-area {
-      display: flex;
-      padding: 10px;
-      background: #17212b;
-    }
-    .input-area input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #0e1621;
-      color: #fff;
-      outline: none;
-      font-size: 14px;
-    }
-    .input-area button {
-      margin-left: 8px;
-      background: #2b5278;
-      color: #fff;
-      border: none;
-      padding: 0 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
+    body { margin: 0; font-family: -apple-system, sans-serif; background: #0e1621; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 130px; background: #17212b; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar button { width: 100%; background: #2b5278; color: #fff; border: none; padding: 10px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 13px; }
+    .chat { flex: 1; display: flex; flex-direction: column; }
+    .messages { flex: 1; overflow-y: auto; padding: 15px; }
+    .msg { margin-bottom: 10px; padding: 10px; border-radius: 10px; max-width: 85%; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+    .user { background: #2b5278; margin-left: auto; }
+    .bot { background: #182533; }
+    .input-area { display: flex; padding: 10px; background: #17212b; }
+    .input-area input { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #0e1621; color: #fff; outline: none; font-size: 14px; }
+    .input-area button { margin-left: 8px; background: #2b5278; color: #fff; border: none; padding: 0 16px; border-radius: 8px; cursor: pointer; font-size: 16px; }
   </style>
 </head>
 <body>
@@ -116,16 +37,11 @@
     tg.ready();
     tg.expand();
 
+    // ⚠️ ЗАМЕНИ НА СВОЙ URL ВЕБХУКА ИЗ TELEBOT CREATOR
+    const WEBHOOK_URL = "https://api.telegram.org/botТВОЙ_ТОКЕН/";
+
     let currentChat = 1;
     let chats = [1];
-
-    function renderChatList() {
-      const list = document.getElementById('chat-list');
-      list.innerHTML = '';
-      chats.forEach((id) => {
-        list.innerHTML += `<div class="chat-item ${id === currentChat ? 'active' : ''}" onclick="switchChat(${id})">💬 Чат ${id}</div>`;
-      });
-    }
 
     function addMessage(text, role) {
       const el = document.getElementById('messages');
@@ -133,14 +49,39 @@
       el.scrollTop = el.scrollHeight;
     }
 
-    function sendMessage() {
+    async function sendMessage() {
       const input = document.getElementById('user-input');
       const text = input.value.trim();
       if (!text) return;
+      
       addMessage(text, 'user');
       input.value = '';
       addMessage('⏳ Думаю...', 'bot');
-      tg.sendData(JSON.stringify({ type: 'chat', text: text, chat: currentChat }));
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text,
+            user_id: tg.initDataUnsafe.user.id,
+            chat_id: currentChat
+          })
+        });
+        const data = await response.json();
+        
+        // Удаляем "Думаю..." и показываем ответ
+        const messages = document.getElementById('messages');
+        messages.removeChild(messages.lastChild);
+        
+        if (data.ok && data.answer) {
+          addMessage(data.answer, 'bot');
+        } else {
+          addMessage("⚠️ Ошибка: не получил ответ от бота.", 'bot');
+        }
+      } catch (err) {
+        addMessage(`⚠️ Ошибка сети: ${err.message}`, 'bot');
+      }
     }
 
     function newChat() {
@@ -152,11 +93,18 @@
       renderChatList();
     }
 
+    function renderChatList() {
+      const list = document.getElementById('chat-list');
+      list.innerHTML = '';
+      chats.forEach((id) => {
+        list.innerHTML += `<div class="chat-item" onclick="switchChat(${id})">💬 Чат ${id}</div>`;
+      });
+    }
+
     function switchChat(id) {
       currentChat = id;
       document.getElementById('messages').innerHTML = '';
       addMessage('Ты в чате ' + id, 'bot');
-      renderChatList();
     }
 
     renderChatList();
