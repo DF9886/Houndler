@@ -72,8 +72,8 @@
         const messages = document.getElementById('messages');
         messages.removeChild(messages.lastChild);
 
-        if (data.ok && data.answer) {
-          addMessage(data.answer, 'bot');
+        if (data.ok && data.result && data.result.answer) {
+          addMessage(data.result.answer, 'bot');
         } else {
           addMessage("⚠️ Ответ сервера: " + JSON.stringify(data), 'bot');
         }
