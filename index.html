@@ -37,8 +37,8 @@
     tg.ready();
     tg.expand();
 
-    // ⚠️ ЗАМЕНИ НА СВОЙ URL ВЕБХУКА ИЗ TELEBOT CREATOR
-    const WEBHOOK_URL =https://api.telebotcreator.com/new-webhook?data=gAAAAABqulTuEfTdYqXeTzFLnfZT8tsiW-o644_nevoSVuiXGyx8deT8-hFvud1hhQn6y-RQF9d-UMgRxSOS2xYcDGZoflAvdoIGLvGbAfb7ZHR9EtOwmAsFze0BlirVWNe-H65NvtaI2GRoD2TAufWqOW5HHse13_S7lPz9XIa-AHElKYykl-2xh8J9VhA4tiAVTweSNHzL` "https://api.telegram.org/botТВОЙ_ТОКЕН/";
+    // ===== URL ВЕБХУКА ИЗ TELEBOT CREATOR =====
+    const WEBHOOK_URL = "https://api.telebotcreator.com/new-webhook?data=gAAAAABqulTuEfTdYqXeTzFLnfZT8tsiW-o644_nevoSVuiXGyx8deT8-hFvud1hhQn6y-RQF9d-UMgRxSOS2xYcDGZoflAvdoIGLvGbAfb7ZHR9EtOwmAsFze0BlirVWNe-H65NvtaI2GRoD2TAufWqOW5HHse13_S7lPz9XIa-AHElKYykl-2xh8J9VhA4tiAVTweSNHzL";
 
     let currentChat = 1;
     let chats = [1];
@@ -53,7 +53,7 @@
       const input = document.getElementById('user-input');
       const text = input.value.trim();
       if (!text) return;
-      
+
       addMessage(text, 'user');
       input.value = '';
       addMessage('⏳ Думаю...', 'bot');
@@ -69,15 +69,14 @@
           })
         });
         const data = await response.json();
-        
-        // Удаляем "Думаю..." и показываем ответ
+
         const messages = document.getElementById('messages');
         messages.removeChild(messages.lastChild);
-        
+
         if (data.ok && data.answer) {
           addMessage(data.answer, 'bot');
         } else {
-          addMessage("⚠️ Ошибка: не получил ответ от бота.", 'bot');
+          addMessage("⚠️ Ошибка: " + JSON.stringify(data), 'bot');
         }
       } catch (err) {
         addMessage(`⚠️ Ошибка сети: ${err.message}`, 'bot');
