@@ -19,16 +19,19 @@ async function sendMessage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: text })
         });
-        const data = await response.json();
+        
+        // Смотрим, что вообще вернул воркер
+        const rawText = await response.text();
         
         const botDiv = document.createElement("div");
-        botDiv.textContent = data.reply || "Ошибка: " + (data.error || "нет ответа");
         botDiv.style.textAlign = "left";
         botDiv.style.margin = "10px";
+        botDiv.textContent = "Ответ сервера: " + rawText;
         chat.appendChild(botDiv);
+        
     } catch (e) {
         const errDiv = document.createElement("div");
-        errDiv.textContent = "Ошибка сети";
+        errDiv.textContent = "Ошибка сети: " + e.message;
         chat.appendChild(errDiv);
     }
 }
